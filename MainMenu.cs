@@ -11,7 +11,7 @@ namespace ConsoleGame_Snake
         public enum MenuStates
         {
             Play = 0,
-            CustomGame = 1,
+            Settings = 1,
             HowToPlay = 2,
             End = 3
         }
@@ -63,5 +63,34 @@ namespace ConsoleGame_Snake
             Console.WriteLine("Press any key to continue.");
             Console.ResetColor();
         }
+
+        public static Tuple<int, int, int> Settings()
+        {
+            int x, y, speed;
+            Console.WriteLine("Set size of map");
+
+            Console.Write("Enter the game field width(10-40) : ");
+            while (!int.TryParse(Console.ReadLine().Trim().ToLower(), out x))
+                Console.WriteLine("Invalit input! Please try again.");
+
+            Console.Write("Enter the game field height(10-25) : ");
+            while (!int.TryParse(Console.ReadLine().Trim().ToLower(), out y))
+                Console.WriteLine("Invalit input! Please try again.");
+
+            Console.Write("Enter the speed of snake(1-5) : ");
+
+            while (!int.TryParse(Console.ReadLine().Trim().ToLower(), out speed))
+                Console.WriteLine("Invalit input! Please try again.");
+
+            if (x < 10 || x > 40)
+                x = 25;
+            if (y < 10 || y > 25)
+                y = 15;
+            if (speed < 1 || speed > 5)
+                speed = 1;
+
+
+            return Tuple.Create(x, y, speed);
+        }
     }
-    }
+}
