@@ -12,17 +12,19 @@ namespace ConsoleGame_Snake
 
         //Game World
         int[,] map;
+        int[,] mapTime;
         int x, y;
 
         //GameStates
         private const int freeSpace = 0, body = 1, point = 2;
-        private int[,] snakeBodyLifeTime;
+        private int snakeBodyLifeTime;
 
         private int LastX = 1, LastY = 1;
 
         public Snake(int mapWidth, int mapHeight, int speed)
         {
             map = new int[mapWidth, mapHeight];
+            mapTime = new int[mapWidth, mapHeight]; //for time to live body
 
             map[mapWidth / 2 + 4, mapHeight / 2] = point; //initial point generation
             x = mapWidth / 2 - 4;
@@ -76,6 +78,7 @@ namespace ConsoleGame_Snake
         {
             if (map[x, y] == point) //if point is picked up
             {
+                snakeBodyLifeTime++;
                 map[x, y] = 0;
                 PointGeneration();
             }
@@ -84,22 +87,44 @@ namespace ConsoleGame_Snake
         private void PointGeneration()
         {
             int rndX = rnd.Next(1, map.GetLength(0)), rndY = rnd.Next(1, map.GetLength(1));
-
-            map[rndX, rndY] = point; //initial point generation
-            MapRender();
-
+            if (map[rndX, rndY] != body)
+            {
+                map[rndX, rndY] = point; //generate new point
+                MapRender();
+            }
+            else
+                PointGeneration(); //if generation fails bacause there is body, try again. (I know this is a horrible way to do this. In case of optimalization)
         }
 
         public void PlayerUpdate() //Updating path behind player
         {
-            Console.SetCursorPosition(LastX, LastY);
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.Write(" ");
+            mapTime[LastX, LastY] = snakeBodyLifeTime;
+            map[LastX, LastY] = body;
 
-            Console.SetCursorPosition(x, y);
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.Write(" ");
-            Console.ResetColor();
+            for (int x = 0; x < mapTime.GetLength(0); x++)
+            {
+                for (int y = 0; y < mapTime.GetLength(1); y++)
+                {
+                    //if (mapTime[x, y] != 0)
+                    //{
+                    //    mapTime[x, y] -= 1;
+                    //    Console.SetCursorPosition(LastX, LastY);
+                    //    Console.BackgroundColor = ConsoleColor.White;
+                    //    Console.Write(" ");
+                    //}
+                    //else
+                    //{
+                    //    Console.SetCursorPosition(x, y);
+                    //    Console.BackgroundColor = ConsoleColor.White;
+                    //    Console.Write(" ");
+                    //    Console.ResetColor();
+                    //}
+                }
+            }
+
+
+
+
 
             LastX = x;
             LastY = y;
@@ -118,6 +143,7 @@ namespace ConsoleGame_Snake
                         Console.BackgroundColor = ConsoleColor.DarkGray;
                         Console.Write(" ");
                         Console.ResetColor();
+
                     }
                     else if (map[x, y] == point)
                     {
