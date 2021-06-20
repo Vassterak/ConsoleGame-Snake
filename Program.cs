@@ -24,7 +24,6 @@ namespace ConsoleGame_Snake
                         snake = new Snake(x, y, speed);
                         while (gameContinues)
                         {
-                            snake.Movement();
                             snake.PlayerUpdate();
                         }
 

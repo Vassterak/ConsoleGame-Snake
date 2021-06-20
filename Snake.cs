@@ -3,44 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace ConsoleGame_Snake
 {
     class Snake
     {
-        Random rnd = new Random(); //random for point generation
+        Random rnd = new Random();
 
         //Game World
-        int[,] map;
-        int[,] mapTime;
+        int[,] map; 
+        int[,] bodyLifeTime;
+        int score;
         int x, y;
 
         //GameStates
-        private const int freeSpace = 0, body = 1, point = 2;
-        private int snakeBodyLifeTime;
-
-        private int LastX = 1, LastY = 1;
+        private const int freeSpace = 0, wall = 1, point = 2, snake = 3;
 
         public Snake(int mapWidth, int mapHeight, int speed)
         {
-            map = new int[mapWidth, mapHeight];
-            mapTime = new int[mapWidth, mapHeight]; //for time to live body
-
-            map[mapWidth / 2 + 4, mapHeight / 2] = point; //initial point generation
-            x = mapWidth / 2 - 4;
-            y = mapHeight / 2;
+            score = 1;
+            map = new int[mapWidth, mapHeight]; //set world size
+            bodyLifeTime = new int[mapWidth, mapHeight]; //set world size for life value of each block
 
             for (int x = 0; x < mapWidth; x++) //setting up walls X cordinaties, body has same properties as wall, so it's not necessary to create separate ID for wall
             {
-                map[x, 0] = body;
-                map[x, mapHeight - 1] = body;
+                map[x, 0] = wall;
+                map[x, mapHeight - 1] = wall;
             }
 
             for (int y = 0; y < mapHeight; y++) //setting up walls Y cordinaties
             {
-                map[0, y] = body;
-                map[mapWidth - 1, y] = body;
+                map[0, y] = wall;
+                map[mapWidth - 1, y] = wall;
             }
+
+            //initial point generation (it's not random.)
+            map[mapWidth / 2 + 4, mapHeight / 2] = point;
+            x = mapWidth / 2 - 4;
+            y = mapHeight / 2;
+
+            //initial player location
+            map[mapWidth / 2 - 4, mapHeight / 2] = snake;
+            bodyLifeTime[mapWidth / 2 - 4, mapHeight / 2] = score;
+
             MapRender();
         }
 
@@ -70,66 +76,34 @@ namespace ConsoleGame_Snake
                     Program.gameContinues = false;
                     break;
             }
-            GameMapUpdate();
-
         }
 
-        private void GameMapUpdate() //how many points are left + checking if player is eligible to finish game
+        private void RandomPointGeneration()
         {
-            if (map[x, y] == point) //if point is picked up
-            {
-                snakeBodyLifeTime++;
-                map[x, y] = 0;
-                PointGeneration();
-            }
-        }
-
-        private void PointGeneration()
-        {
-            int rndX = rnd.Next(1, map.GetLength(0)), rndY = rnd.Next(1, map.GetLength(1));
-            if (map[rndX, rndY] != body)
+            int rndX = rnd.Next(1, map.GetLength(0)-1), rndY = rnd.Next(1, map.GetLength(1)-1);
+            if (map[rndX, rndY] != snake)
             {
                 map[rndX, rndY] = point; //generate new point
-                MapRender();
             }
             else
-                PointGeneration(); //if generation fails bacause there is body, try again. (I know this is a horrible way to do this. In case of optimalization)
+                RandomPointGeneration(); //if generation fails bacause there is body, try again. (I know this is a horrible way to do this. In case of optimalization)
         }
 
         public void PlayerUpdate() //Updating path behind player
         {
-            mapTime[LastX, LastY] = snakeBodyLifeTime;
-            map[LastX, LastY] = body;
-
-            for (int x = 0; x < mapTime.GetLength(0); x++)
+            Movement();
+            if (map[x, y] == point)
             {
-                for (int y = 0; y < mapTime.GetLength(1); y++)
-                {
-                    //if (mapTime[x, y] != 0)
-                    //{
-                    //    mapTime[x, y] -= 1;
-                    //    Console.SetCursorPosition(LastX, LastY);
-                    //    Console.BackgroundColor = ConsoleColor.White;
-                    //    Console.Write(" ");
-                    //}
-                    //else
-                    //{
-                    //    Console.SetCursorPosition(x, y);
-                    //    Console.BackgroundColor = ConsoleColor.White;
-                    //    Console.Write(" ");
-                    //    Console.ResetColor();
-                    //}
-                }
+                score++;
+                RandomPointGeneration();
             }
 
+            map[x, y] = snake;
+            bodyLifeTime[x, y] = score;
 
+            MapRender();
 
-
-
-            LastX = x;
-            LastY = y;
         }
-
 
         private void MapRender()
         {
@@ -137,20 +111,41 @@ namespace ConsoleGame_Snake
             {
                 for (int y = 0; y < map.GetLength(1); y++)
                 {
-                    if (map[x, y] == body) //obstacles (walls)
+                    switch (map[x, y])
                     {
-                        Console.SetCursorPosition(x, y);
-                        Console.BackgroundColor = ConsoleColor.DarkGray;
-                        Console.Write(" ");
-                        Console.ResetColor();
+                        case wall:
+                            Console.SetCursorPosition(x, y);
+                            Console.BackgroundColor = ConsoleColor.DarkGray;
+                            Console.Write(" ");
+                            Console.ResetColor();
+                            break;
 
+                        case point:
+                            Console.SetCursorPosition(x, y);
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write("#");
+                            Console.ResetColor();
+                            break;
+
+                        case snake:
+                            Console.SetCursorPosition(x, y);
+                            Console.BackgroundColor = ConsoleColor.Green;
+                            Console.Write(" ");
+                            Console.ResetColor();
+                            break;
+
+                        default: //freeSpaceb  
+                            Console.SetCursorPosition(x, y);
+                            Console.Write(" ");
+                            break;
                     }
-                    else if (map[x, y] == point)
+
+                    if (bodyLifeTime[x, y] > 0)
+                        bodyLifeTime[x, y]--;
+                    else
                     {
-                        Console.SetCursorPosition(x, y);
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write("#");
-                        Console.ResetColor();
+                        if (map[x,y] == snake)
+                            map[x, y] = freeSpace;
                     }
                 }
             }
