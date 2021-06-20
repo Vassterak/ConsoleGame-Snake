@@ -12,7 +12,7 @@ namespace ConsoleGame_Snake
         static void Main(string[] args)
         {
             Snake snake;
-            int x = 25, y = 25, speed = 1; //default values of map size and snake speed
+            int x = 25, y = 25, speed = 150; //default values of map size and snake speed
 
             while (true)
             {
@@ -24,7 +24,7 @@ namespace ConsoleGame_Snake
                         snake = new Snake(x, y, speed);
                         while (gameContinues)
                         {
-                            snake.PlayerUpdate();
+                            snake.Movement(); //hovno je to
                         }
 
                         break;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Diagnostics;
 
 namespace ConsoleGame_Snake
@@ -12,16 +12,22 @@ namespace ConsoleGame_Snake
         Random rnd = new Random();
 
         //Game World
+        bool canMove;
         int[,] map; 
         int[,] bodyLifeTime;
         int score;
         int x, y;
+        Timer fps; //fps in miliseconds
 
         //GameStates
         private const int freeSpace = 0, wall = 1, point = 2, snake = 3;
+        ConsoleKeyInfo lastKey; //last key pressed
 
         public Snake(int mapWidth, int mapHeight, int speed)
         {
+            canMove = false;
+            lastKey = new ConsoleKeyInfo((char)ConsoleKey.RightArrow,ConsoleKey.RightArrow, false, false, false); //garbage
+            fps = new Timer(GameUpdate, null, 0, speed);
             score = 1;
             map = new int[mapWidth, mapHeight]; //set world size
             bodyLifeTime = new int[mapWidth, mapHeight]; //set world size for life value of each block
@@ -52,8 +58,11 @@ namespace ConsoleGame_Snake
 
         public void Movement()
         {
-            ConsoleKeyInfo pressedKey = Console.ReadKey(true);
+            lastKey = Console.ReadKey(true);
+        }
 
+        private void AutomaticMovement(ConsoleKeyInfo pressedKey)
+        {
             switch (pressedKey.Key)
             {
                 case ConsoleKey.DownArrow:
@@ -91,7 +100,6 @@ namespace ConsoleGame_Snake
 
         public void PlayerUpdate() //Updating path behind player
         {
-            Movement();
             if (map[x, y] == point)
             {
                 score++;
@@ -102,7 +110,15 @@ namespace ConsoleGame_Snake
             bodyLifeTime[x, y] = score;
 
             MapRender();
+        }
 
+        private void GameUpdate(Object o)
+        {
+            AutomaticMovement(lastKey);
+
+            if (canMove)
+                PlayerUpdate();
+            canMove = true;
         }
 
         private void MapRender()
