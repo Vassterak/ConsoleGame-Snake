@@ -46,7 +46,7 @@ namespace ConsoleGame_Snake
             }
 
             //initial point generation (it's not random.)
-            map[mapWidth / 2 + 4, mapHeight / 2] = point;
+            map[mapWidth / 2 + 3, mapHeight / 2] = point;
             x = mapWidth / 2 - 4;
             y = mapHeight / 2;
 
@@ -83,7 +83,11 @@ namespace ConsoleGame_Snake
                     break;
 
                 case ConsoleKey.Escape:
-                    Program.gameContinues = false;
+                    End();
+                    break;
+
+                default:
+                    x++;
                     break;
             }
             ObstacleDetection();
@@ -112,6 +116,7 @@ namespace ConsoleGame_Snake
             bodyLifeTime[x, y] = score;
 
             MapRender();
+            UIRender();
         }
 
         private void GameUpdate(Object o)
@@ -165,6 +170,7 @@ namespace ConsoleGame_Snake
             Console.Clear();
             Console.SetCursorPosition(1, 1);
             Console.WriteLine("You lost!");
+            Console.WriteLine($"Your score was: {score-1}");
             Program.gameContinues = false;
             canMove = false;
         }
@@ -213,6 +219,12 @@ namespace ConsoleGame_Snake
                     }
                 }
             }
+        }
+
+        private void UIRender()
+        {
+            Console.SetCursorPosition(0, map.GetLength(1) + 1);
+            Console.WriteLine($"Your score: {score-1}");
         }
 
     }
