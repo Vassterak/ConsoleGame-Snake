@@ -23,10 +23,7 @@ namespace ConsoleGame_Snake
                         gameContinues = true;
                         snake = new Snake(x, y, speed);
                         while (gameContinues)
-                        {
-                            snake.Movement(); //hovno je to
-                        }
-
+                            snake.Movement(); //waits for user input to change direction
                         break;
 
                     case MainMenu.MenuStates.Settings:

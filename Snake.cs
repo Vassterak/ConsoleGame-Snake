@@ -10,6 +10,7 @@ namespace ConsoleGame_Snake
     class Snake
     {
         Random rnd = new Random();
+        Program program = new Program();
 
         //Game World
         bool canMove;
@@ -26,7 +27,7 @@ namespace ConsoleGame_Snake
         public Snake(int mapWidth, int mapHeight, int speed)
         {
             canMove = false;
-            lastKey = new ConsoleKeyInfo((char)ConsoleKey.RightArrow,ConsoleKey.RightArrow, false, false, false); //garbage
+            lastKey = new ConsoleKeyInfo((char)ConsoleKey.RightArrow,ConsoleKey.RightArrow, false, false, false); //necessary for initial direction
             fps = new Timer(GameUpdate, null, 0, speed);
             score = 1;
             map = new int[mapWidth, mapHeight]; //set world size
@@ -56,7 +57,7 @@ namespace ConsoleGame_Snake
             MapRender();
         }
 
-        public void Movement()
+        public void Movement() //called by the user
         {
             lastKey = Console.ReadKey(true);
         }
@@ -85,6 +86,7 @@ namespace ConsoleGame_Snake
                     Program.gameContinues = false;
                     break;
             }
+            ObstacleDetection();
         }
 
         private void RandomPointGeneration()
@@ -116,9 +118,55 @@ namespace ConsoleGame_Snake
         {
             AutomaticMovement(lastKey);
 
-            if (canMove)
+            if (canMove) //this is required because we dont want to run PlayerUpdate() in first load after constructor runs line 30.
                 PlayerUpdate();
             canMove = true;
+        } //called every n-miliseconds
+
+        private void ObstacleDetection()
+        {
+            if (map[x, y] == wall)
+                End();
+
+            else
+            {
+                switch (lastKey.Key)
+                {
+                    case ConsoleKey.DownArrow:
+                        if (map[x, y + 1] == snake)
+                            End();
+
+                        break;
+
+                    case ConsoleKey.UpArrow:
+                        if (map[x, y - 1] == snake)
+                            End();
+                        break;
+
+                    case ConsoleKey.LeftArrow:
+                        if (map[x-1, y] == snake)
+                            End();
+                        break;
+
+                    case ConsoleKey.RightArrow:
+                        if (map[x+1, y] == snake)
+                            End();
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void End()
+        {
+            fps.Dispose();
+            Console.Clear();
+            Console.SetCursorPosition(1, 1);
+            Console.WriteLine("You lost!");
+            Program.gameContinues = false;
+            canMove = false;
         }
 
         private void MapRender()

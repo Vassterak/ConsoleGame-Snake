@@ -15,7 +15,6 @@ namespace ConsoleGame_Snake
             HowToPlay = 2,
             End = 3
         }
-
         public static int ShowMainMenu()
         {
             int selectedItemID = 0;
@@ -77,8 +76,7 @@ namespace ConsoleGame_Snake
             while (!int.TryParse(Console.ReadLine().Trim().ToLower(), out y))
                 Console.WriteLine("Invalit input! Please try again.");
 
-            Console.Write("Enter the speed of snake(1-5) : ");
-
+            Console.Write("Enter the speed of game frames in ms(50-500) : ");
             while (!int.TryParse(Console.ReadLine().Trim().ToLower(), out speed))
                 Console.WriteLine("Invalit input! Please try again.");
 
@@ -86,8 +84,8 @@ namespace ConsoleGame_Snake
                 x = 25;
             if (y < 10 || y > 25)
                 y = 15;
-            if (speed < 1 || speed > 5)
-                speed = 1;
+            if (speed < 50 || speed > 500)
+                speed = 100;
 
 
             return Tuple.Create(x, y, speed);
